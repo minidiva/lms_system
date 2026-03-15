@@ -6,7 +6,7 @@ info:
   contact:
     name: LMS System
     email: support@lms.com
-host: localhost:8080
+host: localhost:8082
 basePath: /api/v1
 schemes:
   - http
