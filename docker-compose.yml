@@ -49,6 +49,8 @@ services:
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
     networks:
       - lms_net
+    env_file:
+      - .env
 
   keycloak-db:
     image: postgres:15

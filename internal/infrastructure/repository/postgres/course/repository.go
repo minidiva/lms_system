@@ -86,10 +86,10 @@ func (r *Repository) DeleteCourseById(ctx context.Context, courseId uint) error 
 }
 
 func (r *Repository) GetCourseById(ctx context.Context, id uint) (*entity.CourseAggregate, error) {
-	var course entity.Course
 
+	// Шаг 1: загружаем курс
+	var course entity.Course
 	err := r.db.WithContext(ctx).
-		Preload("Chapters").
 		Where("id = ?", id).
 		First(&course).Error
 
@@ -109,8 +109,16 @@ func (r *Repository) GetCourseById(ctx context.Context, id uint) (*entity.Course
 		return nil, err
 	}
 
+	// Шаг 2: загружаем главы этого курса отдельно
+	var chapters []entity.Chapter
+	r.db.WithContext(ctx).
+		Where("course_id = ?", id).
+		Find(&chapters)
+
+	// Шаг 3: собираем агрегат вручную
 	return &entity.CourseAggregate{
-		Course: course,
+		Course:   course,
+		Chapters: chapters,
 	}, nil
 }
 

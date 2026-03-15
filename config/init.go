@@ -8,7 +8,7 @@ import (
 )
 
 func LoadConfig() *Config {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Println("⚠️ .env не найден, читаю переменные окружения напрямую")
 	}
