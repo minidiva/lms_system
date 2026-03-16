@@ -17,21 +17,14 @@
 - [x] CRUD курсов
 - [x] CRUD глав
 - [x] CRUD уроков
-- [x] Покупка курса пользователем
-- [x] Авторизация / доступ по ролям
-- [x] REST API (через Gin)
-- [x] Документация через Swagger
+- [x] Авторизация
 - [x] Миграции базы данных (Goose)
 - [x] Docker + Docker Compose
-- [x] Unit тесты (Testify)
-- [x] Моки репозиториев (Mockery)
-
 ---
 
 ## ⚙️ Технологии
 
 - Язык: **Golang**
-- Веб-фреймворк: **Gin**
 - ORM: **GORM**
 - БД: **PostgreSQL**
 - Документация: **Swagger**
@@ -63,33 +56,4 @@ http://localhost:8080/swagger/index.html
 
 ---
 
-## 🧪 Тесты
-
-```bash
-go test ./...
-```
-
----
-
-## 📦 Миграции базы данных
-
-```bash
-go run cmd/migrate/main.go up
-```
-
-> Или используйте `make migrate-up`, если есть Makefile.
-
----
-
-## 📝 Примечание
-
-Это pet-проект, разрабатываемый в рамках стажировки, и не предназначен для использования в продакшене без доработок.
-
----
-
-## 📫 Обратная связь
-
-Разработчик: [Alexandra Flicker](https://github.com/Alexandra-Flicker)
-
----
 
