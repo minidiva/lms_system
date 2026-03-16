@@ -39,10 +39,7 @@
 
 > Убедитесь, что установлен Docker и Docker Compose.
 
-1. Скопируйте `.env.example`:
-```bash
-cp .env.example .env
-```
+1. Создайте `.env`
 
 2. Запустите проект:
 ```bash
@@ -51,7 +48,7 @@ docker-compose up --build
 
 3. Swagger документация будет доступна по адресу:
 ```
-http://localhost:8080/swagger/index.html
+http://localhost:8082/swagger/index.html
 ```
 
 ---
