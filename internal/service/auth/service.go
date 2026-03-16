@@ -1,18 +1,18 @@
 package auth
 
 import (
-	"github.com/sirupsen/logrus"
 	"lms_system/internal/domain"
-	"lms_system/internal/infrastructure/clients/http/keycloak"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Service struct {
 	mainRepo       domain.MainRepositoryInterface
 	logger         *logrus.Logger
-	keycloakClient *keycloak.Client
+	keycloakClient KeycloakClientInterface
 }
 
-func NewService(mainRepo domain.MainRepositoryInterface, logger *logrus.Logger, keycloakClient *keycloak.Client) *Service {
+func NewService(mainRepo domain.MainRepositoryInterface, logger *logrus.Logger, keycloakClient KeycloakClientInterface) *Service {
 	return &Service{
 		mainRepo:       mainRepo,
 		logger:         logger,
