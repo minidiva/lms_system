@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"lms_system/internal/infrastructure/clients/http/keycloak"
 	minioClient "lms_system/internal/infrastructure/clients/minio"
 	"lms_system/internal/service/auth"
 	"lms_system/internal/service/file"
 	"lms_system/internal/service/lms"
+
+	"github.com/sirupsen/logrus"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"lms_system/config"
 	_ "lms_system/docs"
@@ -17,6 +18,15 @@ import (
 	infraPostgres "lms_system/internal/infrastructure/repository/postgres"
 )
 
+// @title           LMS System API
+// @version         1.0
+// @description     API для системы управления обучением
+// @host            localhost:8082
+// @BasePath        /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// Load and parse config
 	cfg := config.LoadConfig()
