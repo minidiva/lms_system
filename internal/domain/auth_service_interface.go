@@ -2,7 +2,7 @@ package domain
 
 import (
 	"context"
-	"lms_system/internal/domain/dto"
+	dto "lms_system/internal/domain/dto/auth"
 )
 
 type AuthServiceInterface interface {

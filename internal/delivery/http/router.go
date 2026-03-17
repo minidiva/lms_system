@@ -37,31 +37,33 @@ func NewRouter(service domain.ServiceInterface, authService domain.AuthServiceIn
 	attachmentHandler := attachment.NewHandler(service)
 
 	router.Route("/api/v1", func(r chi.Router) {
+
 		// Auth routes
+		// Tested
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/login", authHandler.Login)
 			r.Post("/refresh", authHandler.Refresh)
 		})
 
-		// Public routes (no authentication required)
+		// Public routes (no auth)
+		// Not tested
 		r.Route("/public", func(r chi.Router) {
 			r.Get("/courses", courseHandler.GetAllCourses)
 			r.Get("/courses/{id}", courseHandler.GetCourseById)
 			r.Get("/courses/{id}/chapters", courseHandler.GetChaptersInfoByCourseId)
 		})
 
-		// User routes (authentication required)
+		// User routes (user auth required)
 		r.Route("/user", func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware)
 
-			// Profile management
 			r.Put("/profile", authHandler.UpdateProfile)
 			r.Put("/change-password", authHandler.ChangePassword)
 
 			r.Route("/courses", func(r chi.Router) {
 				r.Get("/", courseHandler.GetAllCourses)
 				r.Get("/{id}", courseHandler.GetCourseById)
-				r.Post("/buy", courseHandler.BuyCourse)
+				r.Post("/buy", courseHandler.BuyCourse) // +
 				r.Get("/{id}/chapters", courseHandler.GetChaptersInfoByCourseId)
 			})
 
@@ -70,110 +72,101 @@ func NewRouter(service domain.ServiceInterface, authService domain.AuthServiceIn
 				r.Get("/{lessonId}/attachments", attachmentHandler.GetLessonAttachments)
 			})
 
-			// File routes for users
 			r.Route("/files", func(r chi.Router) {
 				r.Get("/download", fileHandler.DownloadFile)
 				r.Get("/url", fileHandler.GetFileURL)
 			})
 
-			// Attachment download (requires lesson access)
 			r.Get("/attachments/{attachmentId}/download", attachmentHandler.DownloadAttachment)
 		})
 
-		// Course management (admin only)
-		r.Route("/course", func(r chi.Router) {
-			r.Use(middleware.AuthMiddleware)
-			r.Use(middleware.OnlyRoles(common.RoleAdmin))
-
-			r.Post("/", courseHandler.CreateCourse)
-			r.Put("/{id}", courseHandler.UpdateCourseById)
-			r.Delete("/{id}", courseHandler.DeleteCourseById)
-		})
-
-		// Chapter management (admin only)
-		r.Route("/chapter", func(r chi.Router) {
-			r.Use(middleware.AuthMiddleware)
-			r.Use(middleware.OnlyRoles(common.RoleAdmin))
-
-			r.Post("/", chapterHandler.CreateChapterStandalone)
-			r.Put("/{id}", chapterHandler.UpdateChapterById)
-			r.Delete("/{id}", chapterHandler.DeleteChapterById)
-		})
-
-		// Lesson management (admin only)
-		r.Route("/lesson", func(r chi.Router) {
-			r.Use(middleware.AuthMiddleware)
-			r.Use(middleware.OnlyRoles(common.RoleAdmin))
-
-			r.Post("/", lessonHandler.CreateLessonStandalone)
-			r.Put("/{id}", lessonHandler.UpdateLessonById)
-			r.Delete("/{id}", lessonHandler.DeleteLessonById)
-		})
-
-		// Attachment management (admin and teacher)
+		// Attachment management (admin and teacher auth)
 		r.Route("/attachments", func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware)
-			
-			// Upload (admin and teacher only)
+
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.OnlyRoles(common.RoleAdmin, common.RoleTeacher))
 				r.Post("/lessons/{lessonId}/upload", attachmentHandler.UploadAttachment)
 			})
 
-			// Delete (admin only)
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.OnlyRoles(common.RoleAdmin))
 				r.Delete("/{attachmentId}", attachmentHandler.DeleteAttachment)
 			})
 		})
 
-		// Admin routes (authentication + admin role required)
+		// User management
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware)
 			r.Use(middleware.OnlyRoles(common.RoleAdmin))
+			r.Post("/register", authHandler.RegisterUser)
+		})
 
-			// User management routes
-			r.Route("/users", func(r chi.Router) {
-				r.Post("/register", authHandler.RegisterUser)
+		// Course management
+		r.Route("/courses", func(r chi.Router) {
+			r.Use(middleware.AuthMiddleware)
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.OnlyRoles(common.RoleAdmin))
+				r.Post("/create", courseHandler.CreateCourse)
+				r.Delete("/delete/{id}", courseHandler.DeleteCourseById)
 			})
-
-			r.Route("/courses", func(r chi.Router) {
-				r.Post("/", courseHandler.CreateCourse)
-				r.Put("/{id}", courseHandler.UpdateCourseById)
-				r.Delete("/{id}", courseHandler.DeleteCourseById)
-
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.OnlyRoles(common.RoleTeacher, common.RoleAdmin))
+				r.Put("/update/{id}", courseHandler.UpdateCourseById)
 				r.Route("/{courseId}/chapters", func(r chi.Router) {
 					r.Post("/", chapterHandler.CreateChapter)
 				})
 			})
+		})
+		// Chapter management
+		r.Route("/chapters", func(r chi.Router) {
+			r.Use(middleware.AuthMiddleware)
 
-			r.Route("/chapters", func(r chi.Router) {
-				r.Put("/{id}", chapterHandler.UpdateChapterById)
-				r.Delete("/{id}", chapterHandler.DeleteChapterById)
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.OnlyRoles(common.RoleAdmin))
+				r.Delete("/delete/{id}", chapterHandler.DeleteChapterById)
+			})
 
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.OnlyRoles(common.RoleAdmin, common.RoleTeacher))
+				r.Post("/create", chapterHandler.CreateChapterStandalone)
+				r.Put("/update/{id}", chapterHandler.UpdateChapterById)
 				r.Route("/{chapterId}/lessons", func(r chi.Router) {
 					r.Post("/", lessonHandler.CreateLesson)
 				})
 			})
+		})
 
-			r.Route("/lessons", func(r chi.Router) {
-				r.Put("/{id}", lessonHandler.UpdateLessonById)
+		// Lesson management
+		r.Route("/lessons", func(r chi.Router) {
+			r.Use(middleware.AuthMiddleware)
+
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.OnlyRoles(common.RoleAdmin))
 				r.Delete("/{id}", lessonHandler.DeleteLessonById)
 			})
 
-			// File management routes
-			r.Route("/files", func(r chi.Router) {
-				r.Post("/upload", fileHandler.UploadFile)
-				r.Delete("/", fileHandler.DeleteFile)
-				r.Post("/courses/{courseId}/upload", fileHandler.UploadCourseFile)
-				r.Post("/lessons/{lessonId}/upload", fileHandler.UploadLessonFile)
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.OnlyRoles(common.RoleAdmin, common.RoleTeacher))
+				r.Post("/", lessonHandler.CreateLessonStandalone)
+				r.Put("/{id}", lessonHandler.UpdateLessonById)
 			})
 		})
-	})
 
+		// File management
+		r.Route("/files", func(r chi.Router) {
+			r.Use(middleware.AuthMiddleware)
+			r.Use(middleware.OnlyRoles(common.RoleAdmin, common.RoleTeacher))
+
+			r.Post("/upload", fileHandler.UploadFile)
+			r.Delete("/", fileHandler.DeleteFile)
+			r.Post("/courses/{courseId}/upload", fileHandler.UploadCourseFile)
+			r.Post("/lessons/{lessonId}/upload", fileHandler.UploadLessonFile)
+		})
+	})
 	// Swagger documentation
 	router.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8080/swagger/doc.json"),
+		httpSwagger.URL("http://localhost:8082/swagger/doc.json"),
 	))
 
 	// Serve static swagger files

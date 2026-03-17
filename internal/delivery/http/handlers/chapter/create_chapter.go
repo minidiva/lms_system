@@ -5,10 +5,24 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"lms_system/internal/domain/entity"
+
+	"github.com/go-chi/chi/v5"
 )
 
+// CreateChapter godoc
+// @Summary      Create chapter in course
+// @Description  Creates a new chapter in the specified course
+// @Tags         teacher
+// @Accept       json
+// @Produce      json
+// @Param        courseId  path      int             true  "Course ID"
+// @Param        input     body      entity.Chapter  true  "Chapter data"
+// @Success      201       {object}  map[string]uint
+// @Failure      400       {object}  map[string]string
+// @Failure      500       {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /courses/{courseId}/chapters [post]
 func (h *Handler) CreateChapter(w http.ResponseWriter, r *http.Request) {
 	courseIdStr := chi.URLParam(r, "courseId")
 	courseId, err := strconv.ParseUint(courseIdStr, 10, 32)

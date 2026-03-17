@@ -8,6 +8,16 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// GetChaptersInfoByCourseId godoc
+// @Summary      Get chapters by course ID
+// @Description  Returns list of chapters with lesson names for the specified course
+// @Tags         courses
+// @Produce      json
+// @Param        id   path      int  true  "Course ID"
+// @Success      200  {array}   entity.ChapterInfoAggregate
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /public/courses/{id}/chapters [get]
 func (h *Handler) GetChaptersInfoByCourseId(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 32)

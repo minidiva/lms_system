@@ -4,10 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"lms_system/internal/domain/dto"
+	dto "lms_system/internal/domain/dto/auth"
 	"lms_system/utils"
 )
 
+// ChangePassword godoc
+// @Summary      User ChangePassword
+// @Description  Accepts AccessKey, returns AccessToken and RefreshToken
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        input  body      dto.ChangePasswordRequest  true  "Current&New Password  credentials"
+// @Success      200    {object}  dto.ChangePasswordResponse
+// @Security     BearerAuth
+// @Failure      400    {object}  map[string]string
+// @Failure      401    {object}  map[string]string
+// @Router       /user/change-password [post]
 func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context (set by auth middleware)
 	user := utils.GetUserFromContext(r.Context())

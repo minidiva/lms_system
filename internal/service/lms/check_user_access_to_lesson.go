@@ -3,20 +3,19 @@ package lms
 import (
 	"context"
 	"fmt"
-	"lms_system/internal/utils"
 
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId uint, lessonId uint) (bool, error) {
+func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId string, lessonId uint) (bool, error) {
 
-	// INFO — общее действие
 	s.logger.WithFields(logrus.Fields{
 		"user_id":   userId,
 		"lesson_id": lessonId,
 	}).Info("Checking user access to lesson")
 
-	if userId == 1 || userId == utils.ConvertKeycloakIDToUint("32bfb3d7-5b2c-4502-b08a-92ae81984f57") {
+	// Проверяем UUID напрямую
+	if userId == "32bfb3d7-5b2c-4502-b08a-92ae81984f57" {
 		s.logger.WithField("user_id", userId).Debug("Admin user access granted")
 		return true, nil
 	}
@@ -31,7 +30,6 @@ func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId uint, less
 		return false, fmt.Errorf("lesson not found")
 	}
 
-	// DEBUG — детали урока
 	s.logger.WithFields(logrus.Fields{
 		"lesson_id":  lessonId,
 		"chapter_id": lesson.ChapterID,
@@ -47,7 +45,6 @@ func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId uint, less
 		return false, fmt.Errorf("chapter not found")
 	}
 
-	// DEBUG — детали главы
 	s.logger.WithFields(logrus.Fields{
 		"chapter_id": lesson.ChapterID,
 		"course_id":  chapter.CourseID,
@@ -61,7 +58,6 @@ func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId uint, less
 
 	hasAccess := access != nil && access.Unlocked
 
-	// INFO — результат проверки
 	s.logger.WithFields(logrus.Fields{
 		"user_id":    userId,
 		"lesson_id":  lessonId,

@@ -19,5 +19,4 @@ type Chapter struct {
 	CourseID      uint
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	Title         string
 }

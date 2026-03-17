@@ -39,8 +39,8 @@ type LessonRepositoryInterface interface {
 
 type UserCourseAccessInterface interface {
 	CreateUserCourseAccess(ctx context.Context, userAccess entity.UserCourseAccess) error
-	GetByUserIdAndCourseId(ctx context.Context, userId uint, courseId uint) (*entity.UserCourseAccess, error)
-	GetAllByUserId(ctx context.Context, userId uint) ([]entity.UserCourseAccess, error)
+	GetByUserIdAndCourseId(ctx context.Context, userId string, courseId uint) (*entity.UserCourseAccess, error)
+	GetAllByUserId(ctx context.Context, userId string) ([]entity.UserCourseAccess, error)
 	UpdateAccess(ctx context.Context, access *entity.UserCourseAccess) error
 }
 

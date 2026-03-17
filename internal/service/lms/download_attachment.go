@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Service) DownloadAttachment(ctx context.Context, attachmentId uint, userId uint) (string, error) {
+func (s *Service) DownloadAttachment(ctx context.Context, attachmentId uint, userId string) (string, error) {
 
 	// INFO — общее действие
 	s.logger.WithFields(logrus.Fields{

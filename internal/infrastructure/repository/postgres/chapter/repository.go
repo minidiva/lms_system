@@ -39,7 +39,7 @@ func (r *Repository) CreateChapter(ctx context.Context, courseId uint, chapter *
 		"method":     "CreateChapter",
 		"chapter_id": chapter.ID,
 		"course_id":  courseId,
-		"title":      chapter.Title,
+		"name":       chapter.Name,
 	}).Info("Chapter created successfully")
 
 	return chapter.ID, nil

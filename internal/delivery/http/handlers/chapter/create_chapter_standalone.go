@@ -2,41 +2,42 @@ package chapter
 
 import (
 	"encoding/json"
-	"net/http"
-	
+	dto "lms_system/internal/domain/dto/chapter"
 	"lms_system/internal/domain/entity"
+	"net/http"
 )
 
-// CreateChapterRequest представляет запрос на создание главы
-type CreateChapterRequest struct {
-	CourseID      uint   `json:"course_id" validate:"required"`
-	Title         string `json:"title" validate:"required"`
-	Description   string `json:"description"`
-	OrderPosition int    `json:"order_position"`
-}
-
-// CreateChapterStandalone создает главу с указанием course_id в теле запроса
+// CreateChapterStandalone godoc
+// @Summary      Create chapter standalone
+// @Description  Creates a new chapter with course_id in request body
+// @Tags         teacher
+// @Accept       json
+// @Produce      json
+// @Param        input  body      CreateChapterRequest  true  "Chapter data"
+// @Success      201    {object}  map[string]interface{}
+// @Failure      400    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /chapters/create [post]
 func (h *Handler) CreateChapterStandalone(w http.ResponseWriter, r *http.Request) {
-	var req CreateChapterRequest
+	var req dto.CreateChapterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	// Валидация
 	if req.CourseID == 0 {
 		http.Error(w, "course_id is required", http.StatusBadRequest)
 		return
 	}
 
-	if req.Title == "" {
-		http.Error(w, "title is required", http.StatusBadRequest)
+	if req.Name == "" {
+		http.Error(w, "name is required", http.StatusBadRequest)
 		return
 	}
 
-	// Создаем entity.Chapter из запроса
 	chapter := entity.Chapter{
-		Title:         req.Title,
+		Name:          req.Name,
 		Description:   req.Description,
 		OrderPosition: req.OrderPosition,
 	}
@@ -51,7 +52,7 @@ func (h *Handler) CreateChapterStandalone(w http.ResponseWriter, r *http.Request
 		"id":        id,
 		"course_id": req.CourseID,
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(response); err != nil {

@@ -5,10 +5,25 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	dto "lms_system/internal/domain/dto/chapter"
 	"lms_system/internal/domain/entity"
+
+	"github.com/go-chi/chi/v5"
 )
 
+// UpdateChapterById godoc
+// @Summary      Update chapter
+// @Description  Updates chapter by ID
+// @Tags         teacher
+// @Accept       json
+// @Produce      json
+// @Param        id     path      int             true  "Chapter ID"
+// @Param        input  body      entity.Chapter  true  "Chapter data"
+// @Success      204
+// @Failure      400    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /chapters/update/{id} [put]
 func (h *Handler) UpdateChapterById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -17,10 +32,16 @@ func (h *Handler) UpdateChapterById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var chapter entity.Chapter
-	if err := json.NewDecoder(r.Body).Decode(&chapter); err != nil {
+	var req dto.UpdateChapterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
+	}
+
+	chapter := entity.Chapter{
+		Name:          req.Name,
+		Description:   req.Description,
+		OrderPosition: req.OrderPosition,
 	}
 
 	chapter.ID = uint(id)

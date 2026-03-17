@@ -4,9 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"lms_system/internal/domain/dto"
+	dto "lms_system/internal/domain/dto/auth"
 )
 
+// Refresh godoc
+// @Summary      User refresh
+// @Description  Accepts RefreshKey, returns new AccessToken and RefreshToken
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        input  body      dto.AuthRefreshRequest  true  "Refresh key"
+// @Success      200    {object}  dto.AuthRefreshResponse
+// @Failure      400    {object}  map[string]string
+// @Failure      401    {object}  map[string]string
+// @Router       /auth/refresh [post]
 func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var request dto.AuthRefreshRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {

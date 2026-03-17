@@ -2,13 +2,26 @@ package lesson
 
 import (
 	"encoding/json"
+	"lms_system/internal/domain/entity"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"lms_system/internal/domain/entity"
 )
 
+// CreateLesson godoc
+// @Summary      Create lesson in chapter
+// @Description  Creates a new lesson in the specified chapter
+// @Tags         teacher
+// @Accept       json
+// @Produce      json
+// @Param        chapterId  path      int            true  "Chapter ID"
+// @Param        input      body      entity.Lesson  true  "Lesson data"
+// @Success      201        {object}  map[string]uint
+// @Failure      400        {object}  map[string]string
+// @Failure      500        {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /chapters/{chapterId}/lessons [post]
 func (h *Handler) CreateLesson(w http.ResponseWriter, r *http.Request) {
 	chapterIdStr := chi.URLParam(r, "chapterId")
 	chapterId, err := strconv.ParseUint(chapterIdStr, 10, 32)

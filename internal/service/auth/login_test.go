@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
-	"lms_system/internal/domain/dto"
+	dto "lms_system/internal/domain/dto/auth"
 	"lms_system/internal/infrastructure/clients/http/keycloak/model"
 	"lms_system/internal/service/auth/mocks"
 	"testing"

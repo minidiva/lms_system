@@ -4,10 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"lms_system/internal/domain/dto"
+	dto "lms_system/internal/domain/dto/auth"
 	"lms_system/utils"
 )
 
+// UpdateProfile godoc
+// @Summary      Update user profile
+// @Description  Accepts FirstName, LastName, Email and updates user profile in Keycloak
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        input  body      dto.UpdateProfileRequest   true  "Profile data"
+// @Success      200    {object}  dto.UpdateProfileResponse
+// @Failure      400    {object}  map[string]string
+// @Failure      401    {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /user/profile [put]
 func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context (set by auth middleware)
 	user := utils.GetUserFromContext(r.Context())

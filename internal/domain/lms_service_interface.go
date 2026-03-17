@@ -38,19 +38,19 @@ type AdminServiceInterface interface {
 type AttachmentServiceInterface interface {
 	// Upload attachment for a lesson
 	UploadAttachment(ctx context.Context, lessonId uint, file multipart.File, fileHeader *multipart.FileHeader) (*entity.Attachment, error)
-	
+
 	// Get attachment by ID (with access check)
-	GetAttachment(ctx context.Context, attachmentId uint, userId uint) (*entity.Attachment, error)
-	
+	GetAttachment(ctx context.Context, attachmentId uint, userId string) (*entity.Attachment, error)
+
 	// Download attachment (with access check)
-	DownloadAttachment(ctx context.Context, attachmentId uint, userId uint) (string, error)
-	
+	DownloadAttachment(ctx context.Context, attachmentId uint, userId string) (string, error)
+
 	// Get all attachments for a lesson
 	GetLessonAttachments(ctx context.Context, lessonId uint) ([]entity.Attachment, error)
-	
+
 	// Delete attachment
 	DeleteAttachment(ctx context.Context, attachmentId uint) error
-	
+
 	// Check if user has access to lesson
-	CheckUserAccessToLesson(ctx context.Context, userId uint, lessonId uint) (bool, error)
+	CheckUserAccessToLesson(ctx context.Context, userId string, lessonId uint) (bool, error)
 }

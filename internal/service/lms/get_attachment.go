@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Service) GetAttachment(ctx context.Context, attachmentId uint, userId uint) (*entity.Attachment, error) {
+func (s *Service) GetAttachment(ctx context.Context, attachmentId uint, userId string) (*entity.Attachment, error) {
 
 	// INFO — общее действие
 	s.logger.WithFields(logrus.Fields{

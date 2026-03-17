@@ -16,7 +16,7 @@ func (s *Service) BuyCourse(ctx context.Context, request dto.BuyCourseRequest) e
 
 	// INFO — общее действие
 	s.logger.WithFields(logrus.Fields{
-		"user_id":   request.UserId,
+		"user_id":   request.UserUUID,
 		"course_id": request.CourseId,
 	}).Info("User buying course")
 
@@ -30,7 +30,7 @@ func (s *Service) BuyCourse(ctx context.Context, request dto.BuyCourseRequest) e
 		return err
 	}
 
-	existingAccess, err := s.repo.UserCourseAccess().GetByUserIdAndCourseId(ctx, request.UserId, request.CourseId)
+	existingAccess, err := s.repo.UserCourseAccess().GetByUserIdAndCourseId(ctx, request.UserUUID, request.CourseId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		s.logger.WithError(err).Error("Failed to check existing course access")
 		return err
@@ -38,17 +38,17 @@ func (s *Service) BuyCourse(ctx context.Context, request dto.BuyCourseRequest) e
 
 	if existingAccess != nil {
 		s.logger.WithFields(logrus.Fields{
-			"user_id":   request.UserId,
+			"user_id":   request.UserUUID,
 			"course_id": request.CourseId,
 		}).Error("User already has access to this course")
 		return fmt.Errorf("user already has access to this course")
 	}
 
 	userAccess := entity.UserCourseAccess{
-		UserID:   request.UserId,
-		CourseID: request.CourseId,
-		Unlocked: true,
-		Created:  time.Now(),
+		UserID:    request.UserUUID,
+		CourseID:  request.CourseId,
+		Unlocked:  true,
+		CreatedAt: time.Now(),
 	}
 
 	// DEBUG — детали создаваемого доступа
@@ -66,7 +66,7 @@ func (s *Service) BuyCourse(ctx context.Context, request dto.BuyCourseRequest) e
 
 	// INFO — успешный результат
 	s.logger.WithFields(logrus.Fields{
-		"user_id":   request.UserId,
+		"user_id":   request.UserUUID,
 		"course_id": request.CourseId,
 	}).Info("Course purchased successfully")
 

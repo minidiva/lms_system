@@ -8,6 +8,17 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// GetLessonById godoc
+// @Summary      Get lesson by ID
+// @Description  Returns lesson by ID
+// @Tags         user
+// @Produce      json
+// @Param        id   path      int  true  "Lesson ID"
+// @Success      200  {object}  entity.Lesson
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /user/lessons/{id} [get]
 func (h *Handler) GetLessonById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
