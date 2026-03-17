@@ -2,7 +2,7 @@
 FROM golang:1.25-alpine AS builder
 
 # 2. Установка зависимостей
-RUN apk add --no-cache git
+RUN apk add git
 
 # 3. Рабочая директория внутри контейнера
 WORKDIR /app
@@ -23,7 +23,7 @@ RUN go build -o main ./cmd/lms
 # Финальный контейнер
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates
+RUN apk add ca-certificates
 
 WORKDIR /root/
 
