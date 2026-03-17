@@ -64,115 +64,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/courses/create": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Creates a new course",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Create course",
-                "parameters": [
-                    {
-                        "description": "Course data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Course"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/courses/delete/{id}": {
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Deletes course by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Delete course",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Course ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/admin/register": {
             "post": {
                 "security": [
@@ -424,7 +315,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Chapter"
+                            "$ref": "#/definitions/chapter.UpdateChapterRequest"
                         }
                     }
                 ],
@@ -453,14 +344,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/chapters/{chapterId}/lessons": {
+        "/courses/create": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Creates a new lesson in the specified chapter",
+                "description": "Creates a new course",
                 "consumes": [
                     "application/json"
                 ],
@@ -468,24 +359,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "teacher"
+                    "admin"
                 ],
-                "summary": "Create lesson in chapter",
+                "summary": "Create course",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Chapter ID",
-                        "name": "chapterId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Lesson data",
+                        "description": "Course data",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Lesson"
+                            "$ref": "#/definitions/dto.CreateCourseRequest"
                         }
                     }
                 ],
@@ -498,6 +382,55 @@ const docTemplate = `{
                                 "type": "integer"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/delete/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes course by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Delete course",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -581,73 +514,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/courses/{courseId}/chapters": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Creates a new chapter in the specified course",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "teacher"
-                ],
-                "summary": "Create chapter in course",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Course ID",
-                        "name": "courseId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Chapter data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Chapter"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/lessons": {
             "post": {
                 "security": [
@@ -673,7 +539,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/lesson.CreateLessonRequest"
+                            "$ref": "#/definitions/dto.CreateLessonRequest"
                         }
                     }
                 ],
@@ -738,7 +604,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Lesson"
+                            "$ref": "#/definitions/dto.UpdateLessonRequest"
                         }
                     }
                 ],
@@ -1192,6 +1058,27 @@ const docTemplate = `{
                 }
             }
         },
+        "chapter.UpdateChapterRequest": {
+            "type": "object",
+            "required": [
+                "course_id",
+                "name"
+            ],
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "order_position": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.AuthLoginRequest": {
             "type": "object",
             "properties": {
@@ -1277,6 +1164,50 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.CreateLessonRequest": {
+            "type": "object",
+            "required": [
+                "chapter_id",
+                "name"
+            ],
+            "properties": {
+                "chapter_id": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "order_position": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateLessonRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "order_position": {
+                    "type": "integer"
                 }
             }
         },
@@ -1509,34 +1440,7 @@ const docTemplate = `{
                 "orderPosition": {
                     "type": "integer"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "lesson.CreateLessonRequest": {
-            "type": "object",
-            "required": [
-                "chapter_id",
-                "title"
-            ],
-            "properties": {
-                "chapter_id": {
-                    "type": "integer"
-                },
-                "content": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "order_position": {
-                    "type": "integer"
-                },
-                "title": {
                     "type": "string"
                 }
             }
