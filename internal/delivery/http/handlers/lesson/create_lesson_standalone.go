@@ -2,17 +2,10 @@ package lesson
 
 import (
 	"encoding/json"
+	"lms_system/internal/domain/dto"
 	"lms_system/internal/domain/entity"
 	"net/http"
 )
-
-type CreateLessonRequest struct {
-	ChapterID     uint   `json:"chapter_id" validate:"required"`
-	Title         string `json:"title" validate:"required"`
-	Description   string `json:"description"`
-	Content       string `json:"content"`
-	OrderPosition int    `json:"order_position"`
-}
 
 // CreateLessonStandalone godoc
 // @Summary      Create lesson standalone
@@ -20,14 +13,14 @@ type CreateLessonRequest struct {
 // @Tags         teacher
 // @Accept       json
 // @Produce      json
-// @Param        input  body      CreateLessonRequest    true  "Lesson data"
+// @Param        input  body      dto.CreateLessonRequest    true  "Lesson data"
 // @Success      201    {object}  map[string]interface{}
 // @Failure      400    {object}  map[string]string
 // @Failure      500    {object}  map[string]string
 // @Security     BearerAuth
 // @Router       /lessons [post]
 func (h *Handler) CreateLessonStandalone(w http.ResponseWriter, r *http.Request) {
-	var req CreateLessonRequest
+	var req dto.CreateLessonRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -38,13 +31,13 @@ func (h *Handler) CreateLessonStandalone(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if req.Title == "" {
+	if req.Name == "" {
 		http.Error(w, "title is required", http.StatusBadRequest)
 		return
 	}
 
 	lesson := entity.Lesson{
-		Title:         req.Title,
+		Name:          req.Name,
 		Description:   req.Description,
 		Content:       req.Content,
 		OrderPosition: req.OrderPosition,

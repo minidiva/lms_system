@@ -113,9 +113,6 @@ func NewRouter(service domain.ServiceInterface, authService domain.AuthServiceIn
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.OnlyRoles(common.RoleTeacher, common.RoleAdmin))
 				r.Put("/update/{id}", courseHandler.UpdateCourseById)
-				r.Route("/{courseId}/chapters", func(r chi.Router) {
-					r.Post("/", chapterHandler.CreateChapter)
-				})
 			})
 		})
 		// Chapter management
@@ -131,9 +128,6 @@ func NewRouter(service domain.ServiceInterface, authService domain.AuthServiceIn
 				r.Use(middleware.OnlyRoles(common.RoleAdmin, common.RoleTeacher))
 				r.Post("/create", chapterHandler.CreateChapterStandalone)
 				r.Put("/update/{id}", chapterHandler.UpdateChapterById)
-				r.Route("/{chapterId}/lessons", func(r chi.Router) {
-					r.Post("/", lessonHandler.CreateLesson)
-				})
 			})
 		})
 

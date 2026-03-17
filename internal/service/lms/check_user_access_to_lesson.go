@@ -2,24 +2,20 @@ package lms
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId string, lessonId uint) (bool, error) {
-
 	s.logger.WithFields(logrus.Fields{
 		"user_id":   userId,
 		"lesson_id": lessonId,
 	}).Info("Checking user access to lesson")
 
-	// Проверяем UUID напрямую
-	if userId == "32bfb3d7-5b2c-4502-b08a-92ae81984f57" {
-		s.logger.WithField("user_id", userId).Debug("Admin user access granted")
-		return true, nil
-	}
-
+	// Шаг 1 — получаем урок
 	lesson, err := s.repo.Lesson().GetLessonById(ctx, lessonId)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to get lesson")
@@ -35,6 +31,7 @@ func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId string, le
 		"chapter_id": lesson.ChapterID,
 	}).Debug("Lesson details")
 
+	// Шаг 2 — получаем главу
 	chapter, err := s.repo.Chapter().GetChapterById(ctx, lesson.ChapterID)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to get chapter")
@@ -50,8 +47,12 @@ func (s *Service) CheckUserAccessToLesson(ctx context.Context, userId string, le
 		"course_id":  chapter.CourseID,
 	}).Debug("Chapter details")
 
+	// Шаг 3 — проверяем доступ
 	access, err := s.repo.UserCourseAccess().GetByUserIdAndCourseId(ctx, userId, chapter.CourseID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil // нет доступа — не ошибка
+		}
 		s.logger.WithError(err).Error("Failed to check course access")
 		return false, fmt.Errorf("failed to check course access: %w", err)
 	}

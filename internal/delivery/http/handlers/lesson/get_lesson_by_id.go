@@ -2,8 +2,10 @@ package lesson
 
 import (
 	"encoding/json"
+	"lms_system/utils"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -27,9 +29,22 @@ func (h *Handler) GetLessonById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lesson, err := h.service.GetLessonById(r.Context(), uint(id))
+	userCtx := utils.GetUserFromContext(r.Context())
+	if userCtx == nil || userCtx.UserID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	}
+
+	lesson, err := h.service.GetLessonById(r.Context(), uint(id), userCtx.UserID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		if err.Error() == "access denied" {
+			http.Error(w, "Access denied", http.StatusForbidden)
+			return
+		}
+		if strings.Contains(err.Error(), "not found") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -39,7 +39,6 @@ func (r *Repository) CreateLesson(ctx context.Context, chapterId uint, lesson en
 		"method":     "CreateLesson",
 		"lesson_id":  lesson.ID,
 		"chapter_id": chapterId,
-		"title":      lesson.Title,
 	}).Info("Lesson created successfully")
 
 	return lesson.ID, nil

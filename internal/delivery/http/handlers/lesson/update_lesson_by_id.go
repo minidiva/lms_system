@@ -2,6 +2,7 @@ package lesson
 
 import (
 	"encoding/json"
+	"lms_system/internal/domain/dto"
 	"lms_system/internal/domain/entity"
 	"net/http"
 	"strconv"
@@ -16,7 +17,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        id     path      int            true  "Lesson ID"
-// @Param        input  body      entity.Lesson  true  "Lesson data"
+// @Param        input  body      dto.UpdateLessonRequest  true  "Lesson data"
 // @Success      204
 // @Failure      400    {object}  map[string]string
 // @Failure      500    {object}  map[string]string
@@ -30,13 +31,20 @@ func (h *Handler) UpdateLessonById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var lesson entity.Lesson
-	if err := json.NewDecoder(r.Body).Decode(&lesson); err != nil {
+	var req dto.UpdateLessonRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	lesson.ID = uint(id)
+	lesson := entity.Lesson{
+		ID:            uint(id),
+		Name:          req.Name,
+		Description:   req.Description,
+		Content:       req.Content,
+		OrderPosition: req.OrderPosition,
+	}
+
 	if err := h.service.UpdateLessonById(r.Context(), lesson); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

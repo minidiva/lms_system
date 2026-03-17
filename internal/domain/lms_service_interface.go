@@ -18,7 +18,7 @@ type UserServiceInterface interface {
 	GetAllCourses(ctx context.Context) ([]entity.Course, error)
 	GetCourseById(ctx context.Context, id uint) (entity.CourseAggregate, error)
 	GetChaptersInfoByCourseId(ctx context.Context, id uint) ([]entity.ChapterInfoAggregate, error)
-	GetLessonById(ctx context.Context, id uint) (entity.Lesson, error)
+	GetLessonById(ctx context.Context, id uint, userUUID string) (entity.Lesson, error)
 }
 
 type AdminServiceInterface interface {

@@ -9,10 +9,9 @@ type Lesson struct {
 	Content       string
 	OrderPosition int
 	ChapterID     uint
-	Title         string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	
+
 	// Relations
 	Attachments []Attachment `json:"attachments,omitempty" gorm:"foreignKey:LessonID"`
 }

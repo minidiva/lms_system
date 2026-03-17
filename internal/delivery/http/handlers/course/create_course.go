@@ -13,12 +13,12 @@ import (
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Param        input  body      entity.Course  true  "Course data"
+// @Param        input  body      dto.CreateCourseRequest  true  "Course data"
 // @Success      201    {object}  map[string]uint
 // @Failure      400    {object}  map[string]string
 // @Failure      500    {object}  map[string]string
 // @Security     BearerAuth
-// @Router       /admin/courses/create [post]
+// @Router       /courses/create [post]
 func (h *Handler) CreateCourse(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateCourseRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

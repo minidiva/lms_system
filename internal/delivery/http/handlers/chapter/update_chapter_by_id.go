@@ -18,7 +18,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        id     path      int             true  "Chapter ID"
-// @Param        input  body      entity.Chapter  true  "Chapter data"
+// @Param        input  body      UpdateChapterRequest  true  "Chapter data"
 // @Success      204
 // @Failure      400    {object}  map[string]string
 // @Failure      500    {object}  map[string]string
