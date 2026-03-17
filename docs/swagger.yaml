@@ -1,805 +1,1000 @@
-swagger: "2.0"
-info:
-  title: LMS System API
-  description: API для системы управления обучением (Learning Management System)
-  version: "1.0"
-  contact:
-    name: LMS System
-    email: support@lms.com
-host: localhost:8082
 basePath: /api/v1
-schemes:
-  - http
-  - https
-
-securityDefinitions:
-  BearerAuth:
-    type: apiKey
-    in: header
-    name: Authorization
-    description: "Введите 'Bearer ' + ваш токен авторизации"
-
 definitions:
-  Course:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: Уникальный идентификатор курса
-      name:
-        type: string
-        description: Название курса
-      description:
-        type: string
-        description: Описание курса
-      price:
-        type: number
-        format: float
-        description: Стоимость курса
-      created_at:
-        type: string
-        format: date-time
-        description: Дата создания курса
-      updated_at:
-        type: string
-        format: date-time
-        description: Дата последнего обновления курса
-      chapters:
-        type: array
-        items:
-          $ref: '#/definitions/Chapter'
-        description: Главы курса
-
-  Chapter:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: Уникальный идентификатор главы
-      course_id:
-        type: integer
-        description: ID курса, к которому относится глава
-      name:
-        type: string
-        description: Название главы
-      description:
-        type: string
-        description: Описание главы
-      order_number:
-        type: integer
-        description: Порядковый номер главы в курсе
-      created_at:
-        type: string
-        format: date-time
-        description: Дата создания главы
-      updated_at:
-        type: string
-        format: date-time
-        description: Дата последнего обновления главы
-
-  Lesson:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: Уникальный идентификатор урока
-      chapter_id:
-        type: integer
-        description: ID главы, к которой относится урок
-      name:
-        type: string
-        description: Название урока
-      content:
-        type: string
-        description: Содержимое урока
-      video_url:
-        type: string
-        description: Ссылка на видео урока
-      order_number:
-        type: integer
-        description: Порядковый номер урока в главе
-      created_at:
-        type: string
-        format: date-time
-        description: Дата создания урока
-      updated_at:
-        type: string
-        format: date-time
-        description: Дата последнего обновления урока
-
-  UserCourseAccess:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: Уникальный идентификатор доступа
-      user_id:
-        type: integer
-        description: ID пользователя
-      course_id:
-        type: integer
-        description: ID курса
-      has_access:
-        type: boolean
-        description: Есть ли доступ к курсу
-      purchased_at:
-        type: string
-        format: date-time
-        description: Дата покупки курса
-
-  BuyCourseRequest:
-    type: object
-    required:
-      - course_id
+  chapter.CreateChapterRequest:
     properties:
       course_id:
         type: integer
-        description: ID курса для покупки
-
-  CreateCourseRequest:
-    type: object
+      description:
+        type: string
+      name:
+        type: string
+      order_position:
+        type: integer
     required:
-      - name
-      - description
-      - price
-    properties:
-      name:
-        type: string
-        description: Название курса
-        example: "Основы программирования"
-      description:
-        type: string
-        description: Описание курса
-        example: "Курс для изучения основ программирования на Python"
-      price:
-        type: number
-        format: float
-        description: Стоимость курса
-        example: 1999.99
-
-  UpdateCourseRequest:
+    - course_id
+    - name
     type: object
+  dto.AuthLoginRequest:
     properties:
-      name:
+      password:
         type: string
-        description: Название курса
-      description:
+      username:
         type: string
-        description: Описание курса
-      price:
-        type: number
-        format: float
-        description: Стоимость курса
-
-  CreateChapterRequest:
     type: object
+  dto.AuthLoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  dto.AuthRefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  dto.AuthRefreshResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  dto.BuyCourseRequest:
+    properties:
+      course_id:
+        type: integer
+      userUUID:
+        description: ← UUID напрямую из Keycloak, не приходит из JSON
+        type: string
+    type: object
+  dto.ChangePasswordRequest:
+    properties:
+      current_password:
+        type: string
+      new_password:
+        minLength: 6
+        type: string
     required:
-      - name
-      - description
-      - order_number
-    properties:
-      name:
-        type: string
-        description: Название главы
-        example: "Введение в Python"
-      description:
-        type: string
-        description: Описание главы
-        example: "Основные концепции языка Python"
-      order_number:
-        type: integer
-        description: Порядковый номер главы
-        example: 1
-
-  UpdateChapterRequest:
+    - current_password
+    - new_password
     type: object
-    properties:
-      name:
-        type: string
-        description: Название главы
-      description:
-        type: string
-        description: Описание главы
-      order_number:
-        type: integer
-        description: Порядковый номер главы
-
-  CreateLessonRequest:
-    type: object
-    required:
-      - name
-      - content
-      - order_number
-    properties:
-      name:
-        type: string
-        description: Название урока
-        example: "Переменные и типы данных"
-      content:
-        type: string
-        description: Содержимое урока
-        example: "В этом уроке мы изучим основные типы данных в Python..."
-      video_url:
-        type: string
-        description: Ссылка на видео урока
-        example: "https://youtube.com/watch?v=example"
-      order_number:
-        type: integer
-        description: Порядковый номер урока
-        example: 1
-
-  UpdateLessonRequest:
-    type: object
-    properties:
-      name:
-        type: string
-        description: Название урока
-      content:
-        type: string
-        description: Содержимое урока
-      video_url:
-        type: string
-        description: Ссылка на видео урока
-      order_number:
-        type: integer
-        description: Порядковый номер урока
-
-  ErrorResponse:
-    type: object
-    properties:
-      error:
-        type: string
-        description: Описание ошибки
-
-  SuccessResponse:
-    type: object
+  dto.ChangePasswordResponse:
     properties:
       message:
         type: string
-        description: Сообщение об успешном выполнении операции
-
-tags:
-  - name: public
-    description: Публичные эндпоинты (не требуют авторизации)
-  - name: user
-    description: Пользовательские эндпоинты (требуют авторизацию пользователя)
-  - name: admin
-    description: Административные эндпоинты (требуют права администратора)
-
+    type: object
+  dto.CreateCourseRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.UpdateProfileRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        minLength: 2
+        type: string
+      last_name:
+        minLength: 2
+        type: string
+    type: object
+  dto.UpdateProfileResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  dto.UserRegistrationRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - roles
+    - username
+    type: object
+  dto.UserRegistrationResponse:
+    properties:
+      email:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  entity.Attachment:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      lesson_id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+  entity.Chapter:
+    properties:
+      courseID:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      orderPosition:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  entity.ChapterInfoAggregate:
+    properties:
+      courseID:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      lessonsName:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      orderPosition:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  entity.Course:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.CourseAggregate:
+    properties:
+      chapters:
+        items:
+          $ref: '#/definitions/entity.Chapter'
+        type: array
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.Lesson:
+    properties:
+      attachments:
+        description: Relations
+        items:
+          $ref: '#/definitions/entity.Attachment'
+        type: array
+      chapterID:
+        type: integer
+      content:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      orderPosition:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  lesson.CreateLessonRequest:
+    properties:
+      chapter_id:
+        type: integer
+      content:
+        type: string
+      description:
+        type: string
+      order_position:
+        type: integer
+      title:
+        type: string
+    required:
+    - chapter_id
+    - title
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: API для системы управления обучением
+  title: LMS System API
+  version: "1.0"
 paths:
-  # PUBLIC ENDPOINTS
+  /admin/chapter/delete/{id}:
+    delete:
+      description: Deletes chapter by ID
+      parameters:
+      - description: Chapter ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete chapter
+      tags:
+      - admin
+  /admin/courses/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new course
+      parameters:
+      - description: Course data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Course'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create course
+      tags:
+      - admin
+  /admin/courses/delete/{id}:
+    delete:
+      description: Deletes course by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete course
+      tags:
+      - admin
+  /admin/register:
+    post:
+      consumes:
+      - application/json
+      description: Accepts Username, Email, Password, FirstName, LastName, Roles and
+        returns user_id, username, email
+      parameters:
+      - description: User credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.UserRegistrationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User Register
+      tags:
+      - admin
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Accepts username and password, returns AccessToken and RefreshToken
+      parameters:
+      - description: Login credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Accepts RefreshKey, returns new AccessToken and RefreshToken
+      parameters:
+      - description: Refresh key
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthRefreshResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User refresh
+      tags:
+      - auth
+  /chapters/{chapterId}/lessons:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new lesson in the specified chapter
+      parameters:
+      - description: Chapter ID
+        in: path
+        name: chapterId
+        required: true
+        type: integer
+      - description: Lesson data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Lesson'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create lesson in chapter
+      tags:
+      - teacher
+  /chapters/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new chapter with course_id in request body
+      parameters:
+      - description: Chapter data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/chapter.CreateChapterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create chapter standalone
+      tags:
+      - teacher
+  /chapters/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates chapter by ID
+      parameters:
+      - description: Chapter ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Chapter data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Chapter'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update chapter
+      tags:
+      - teacher
+  /courses/{courseId}/chapters:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new chapter in the specified course
+      parameters:
+      - description: Course ID
+        in: path
+        name: courseId
+        required: true
+        type: integer
+      - description: Chapter data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Chapter'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create chapter in course
+      tags:
+      - teacher
+  /courses/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates course by ID
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Course data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update course
+      tags:
+      - teacher
+  /lessons:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new lesson with chapter_id in request body
+      parameters:
+      - description: Lesson data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/lesson.CreateLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create lesson standalone
+      tags:
+      - teacher
+  /lessons/{id}:
+    delete:
+      description: Deletes lesson by ID
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete lesson
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Updates lesson by ID
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Lesson data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Lesson'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update lesson
+      tags:
+      - teacher
   /public/courses:
     get:
-      tags:
-        - public
-      summary: Получить список всех курсов
-      description: Возвращает список всех доступных курсов без требования авторизации
+      description: Returns list of all courses
+      produces:
+      - application/json
       responses:
-        200:
-          description: Список курсов успешно получен
+        "200":
+          description: OK
           schema:
-            type: array
             items:
-              $ref: '#/definitions/Course'
-        500:
-          description: Внутренняя ошибка сервера
+              $ref: '#/definitions/entity.Course'
+            type: array
+        "500":
+          description: Internal Server Error
           schema:
-            $ref: '#/definitions/ErrorResponse'
-
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all courses
+      tags:
+      - courses
   /public/courses/{id}:
     get:
-      tags:
-        - public
-      summary: Получить курс по ID
-      description: Возвращает информацию о конкретном курсе по его идентификатору
+      description: Returns course with chapters by ID
       parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID курса
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
       responses:
-        200:
-          description: Курс найден
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/Course'
-        404:
-          description: Курс не найден
+            $ref: '#/definitions/entity.CourseAggregate'
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
-            $ref: '#/definitions/ErrorResponse'
-
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get course by ID
+      tags:
+      - courses
   /public/courses/{id}/chapters:
     get:
-      tags:
-        - public
-      summary: Получить главы курса
-      description: Возвращает список глав для указанного курса
+      description: Returns list of chapters with lesson names for the specified course
       parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID курса
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
       responses:
-        200:
-          description: Список глав получен
+        "200":
+          description: OK
           schema:
-            type: array
             items:
-              $ref: '#/definitions/Chapter'
-        404:
-          description: Курс не найден
+              $ref: '#/definitions/entity.ChapterInfoAggregate'
+            type: array
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  # USER ENDPOINTS
-  /user/courses:
-    get:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get chapters by course ID
       tags:
-        - user
-      summary: Получить курсы пользователя
-      description: Возвращает список курсов, к которым у пользователя есть доступ
-      security:
-        - BearerAuth: []
+      - courses
+  /user/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Accepts AccessKey, returns AccessToken and RefreshToken
+      parameters:
+      - description: Current&New Password  credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChangePasswordRequest'
+      produces:
+      - application/json
       responses:
-        200:
-          description: Список курсов пользователя
+        "200":
+          description: OK
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/UserCourseAccess'
-        401:
-          description: Требуется авторизация
+            $ref: '#/definitions/dto.ChangePasswordResponse'
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
           schema:
-            $ref: '#/definitions/ErrorResponse'
-
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User ChangePassword
+      tags:
+      - user
   /user/courses/buy:
     post:
-      tags:
-        - user
-      summary: Купить курс
-      description: Позволяет пользователю приобрести доступ к курсу
-      security:
-        - BearerAuth: []
+      consumes:
+      - application/json
+      description: Purchase a course for the authenticated user
       parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/BuyCourseRequest'
+      - description: Course ID to buy
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BuyCourseRequest'
+      produces:
+      - application/json
       responses:
-        201:
-          description: Курс успешно приобретен
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/SuccessResponse'
-        400:
-          description: Некорректные данные запроса
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Требуется авторизация
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Курс не найден
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        409:
-          description: Курс уже приобретен
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Buy course
+      tags:
+      - user
   /user/lessons/{id}:
     get:
-      tags:
-        - user
-      summary: Получить урок по ID
-      description: Возвращает содержимое урока, если у пользователя есть доступ к курсу
-      security:
-        - BearerAuth: []
+      description: Returns lesson by ID
       parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID урока
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
       responses:
-        200:
-          description: Урок найден
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/Lesson'
-        401:
-          description: Требуется авторизация
+            $ref: '#/definitions/entity.Lesson'
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Нет доступа к уроку
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Урок не найден
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  # ADMIN ENDPOINTS - COURSES
-  /admin/courses:
-    post:
-      tags:
-        - admin
-      summary: Создать новый курс
-      description: Создает новый курс в системе (только для администраторов)
+            additionalProperties:
+              type: string
+            type: object
       security:
-        - BearerAuth: []
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/CreateCourseRequest'
-      responses:
-        201:
-          description: Курс успешно создан
-          schema:
-            $ref: '#/definitions/Course'
-        400:
-          description: Некорректные данные запроса
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  /admin/courses/{id}:
+      - BearerAuth: []
+      summary: Get lesson by ID
+      tags:
+      - user
+  /user/profile:
     put:
-      tags:
-        - admin
-      summary: Обновить курс
-      description: Обновляет информацию о курсе (только для администраторов)
-      security:
-        - BearerAuth: []
+      consumes:
+      - application/json
+      description: Accepts FirstName, LastName, Email and updates user profile in
+        Keycloak
       parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID курса
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/UpdateCourseRequest'
+      - description: Profile data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProfileRequest'
+      produces:
+      - application/json
       responses:
-        200:
-          description: Курс успешно обновлен
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/Course'
-        400:
-          description: Некорректные данные запроса
+            $ref: '#/definitions/dto.UpdateProfileResponse'
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Требуется авторизация
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Курс не найден
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-    delete:
-      tags:
-        - admin
-      summary: Удалить курс
-      description: Удаляет курс из системы (только для администраторов)
+            additionalProperties:
+              type: string
+            type: object
       security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID курса
-      responses:
-        204:
-          description: Курс успешно удален
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Курс не найден
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  # ADMIN ENDPOINTS - CHAPTERS
-  /admin/courses/{courseId}/chapters:
-    post:
+      - BearerAuth: []
+      summary: Update user profile
       tags:
-        - admin
-      summary: Создать новую главу
-      description: Создает новую главу в указанном курсе (только для администраторов)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: courseId
-          in: path
-          required: true
-          type: integer
-          description: ID курса
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/CreateChapterRequest'
-      responses:
-        201:
-          description: Глава успешно создана
-          schema:
-            $ref: '#/definitions/Chapter'
-        400:
-          description: Некорректные данные запроса
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Курс не найден
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  /admin/chapters/{id}:
-    put:
-      tags:
-        - admin
-      summary: Обновить главу
-      description: Обновляет информацию о главе (только для администраторов)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID главы
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/UpdateChapterRequest'
-      responses:
-        200:
-          description: Глава успешно обновлена
-          schema:
-            $ref: '#/definitions/Chapter'
-        400:
-          description: Некорректные данные запроса
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Глава не найдена
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-    delete:
-      tags:
-        - admin
-      summary: Удалить главу
-      description: Удаляет главу из системы (только для администраторов)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID главы
-      responses:
-        204:
-          description: Глава успешно удалена
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Глава не найдена
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  # ADMIN ENDPOINTS - LESSONS
-  /admin/chapters/{chapterId}/lessons:
-    post:
-      tags:
-        - admin
-      summary: Создать новый урок
-      description: Создает новый урок в указанной главе (только для администраторов)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: chapterId
-          in: path
-          required: true
-          type: integer
-          description: ID главы
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/CreateLessonRequest'
-      responses:
-        201:
-          description: Урок успешно создан
-          schema:
-            $ref: '#/definitions/Lesson'
-        400:
-          description: Некорректные данные запроса
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Глава не найдена
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  /admin/lessons/{id}:
-    put:
-      tags:
-        - admin
-      summary: Обновить урок
-      description: Обновляет информацию об уроке (только для администраторов)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID урока
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/UpdateLessonRequest'
-      responses:
-        200:
-          description: Урок успешно обновлен
-          schema:
-            $ref: '#/definitions/Lesson'
-        400:
-          description: Некорректные данные запроса
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Урок не найден
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-    delete:
-      tags:
-        - admin
-      summary: Удалить урок
-      description: Удаляет урок из системы (только для администраторов)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          type: integer
-          description: ID урока
-      responses:
-        204:
-          description: Урок успешно удален
-        401:
-          description: Требуется авторизация
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        403:
-          description: Недостаточно прав доступа
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: Урок не найден
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/ErrorResponse'
+      - user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
