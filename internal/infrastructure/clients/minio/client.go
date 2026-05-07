@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"time"
+
+	"lms_system/config"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"lms_system/config"
 )
 
 type Client struct {
-	client     *minio.Client
-	bucketName string
+	client         *minio.Client
+	bucketName     string
+	publicEndpoint string // просто строка
 }
 
 func NewClient(cfg *config.Config) (*Client, error) {
-	// Initialize minio client object
 	minioClient, err := minio.New(cfg.MinIO.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.MinIO.AccessKeyID, cfg.MinIO.SecretAccessKey, ""),
 		Secure: cfg.MinIO.UseSSL,
@@ -27,13 +27,11 @@ func NewClient(cfg *config.Config) (*Client, error) {
 		return nil, fmt.Errorf("failed to create minio client: %w", err)
 	}
 
-	// Check if bucket exists, create if not
 	ctx := context.Background()
 	exists, err := minioClient.BucketExists(ctx, cfg.MinIO.BucketName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check bucket existence: %w", err)
 	}
-
 	if !exists {
 		err = minioClient.MakeBucket(ctx, cfg.MinIO.BucketName, minio.MakeBucketOptions{})
 		if err != nil {
@@ -42,8 +40,9 @@ func NewClient(cfg *config.Config) (*Client, error) {
 	}
 
 	return &Client{
-		client:     minioClient,
-		bucketName: cfg.MinIO.BucketName,
+		client:         minioClient,
+		bucketName:     cfg.MinIO.BucketName,
+		publicEndpoint: cfg.MinIO.PublicEndpoint,
 	}, nil
 }
 
@@ -86,12 +85,8 @@ func (c *Client) DeleteFile(ctx context.Context, objectName string) error {
 }
 
 // GetFileURL returns a presigned URL for downloading a file
-func (c *Client) GetFileURL(ctx context.Context, objectName string, expiry int) (string, error) {
-	expiryDuration := time.Duration(expiry) * time.Second
-	url, err := c.client.PresignedGetObject(ctx, c.bucketName, objectName, expiryDuration, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to get presigned URL: %w", err)
-	}
-	return url.String(), nil
-}
 
+func (c *Client) GetFileURL(ctx context.Context, objectName string, expiry int) (string, error) {
+	// Просто возвращаем прямой публичный URL
+	return fmt.Sprintf("http://%s/%s/%s", c.publicEndpoint, c.bucketName, objectName), nil
+}

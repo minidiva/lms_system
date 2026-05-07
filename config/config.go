@@ -28,6 +28,7 @@ type Config struct {
 	}
 	MinIO struct {
 		Endpoint        string
+		PublicEndpoint  string // ← внешний адрес для presigned URL
 		AccessKeyID     string
 		SecretAccessKey string
 		UseSSL          bool

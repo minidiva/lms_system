@@ -71,13 +71,6 @@ func NewRouter(service domain.ServiceInterface, authService domain.AuthServiceIn
 				r.Get("/{id}", lessonHandler.GetLessonById)
 				r.Get("/{lessonId}/attachments", attachmentHandler.GetLessonAttachments)
 			})
-
-			r.Route("/files", func(r chi.Router) {
-				r.Get("/download", fileHandler.DownloadFile)
-				r.Get("/url", fileHandler.GetFileURL)
-			})
-
-			r.Get("/attachments/{attachmentId}/download", attachmentHandler.DownloadAttachment)
 		})
 
 		// Attachment management (admin and teacher auth)
@@ -93,6 +86,8 @@ func NewRouter(service domain.ServiceInterface, authService domain.AuthServiceIn
 				r.Use(middleware.OnlyRoles(common.RoleAdmin))
 				r.Delete("/{attachmentId}", attachmentHandler.DeleteAttachment)
 			})
+
+			r.Get("/{attachmentId}/download", attachmentHandler.DownloadAttachment)
 		})
 
 		// User management
@@ -151,6 +146,9 @@ func NewRouter(service domain.ServiceInterface, authService domain.AuthServiceIn
 		r.Route("/files", func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware)
 			r.Use(middleware.OnlyRoles(common.RoleAdmin, common.RoleTeacher))
+
+			r.Get("/download", fileHandler.DownloadFile) // ← перенести сюда
+			r.Get("/url", fileHandler.GetFileURL)
 
 			r.Post("/upload", fileHandler.UploadFile)
 			r.Delete("/", fileHandler.DeleteFile)

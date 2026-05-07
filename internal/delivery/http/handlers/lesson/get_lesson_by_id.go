@@ -32,9 +32,11 @@ func (h *Handler) GetLessonById(w http.ResponseWriter, r *http.Request) {
 	userCtx := utils.GetUserFromContext(r.Context())
 	if userCtx == nil || userCtx.UserID == "" {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	}
 
-	lesson, err := h.service.GetLessonById(r.Context(), uint(id), userCtx.UserID)
+	// Передаём role
+	lesson, err := h.service.GetLessonById(r.Context(), uint(id), userCtx.UserID, userCtx.Role)
 	if err != nil {
 		if err.Error() == "access denied" {
 			http.Error(w, "Access denied", http.StatusForbidden)
@@ -49,8 +51,5 @@ func (h *Handler) GetLessonById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(lesson); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	json.NewEncoder(w).Encode(lesson)
 }

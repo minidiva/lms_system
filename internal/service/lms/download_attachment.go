@@ -3,13 +3,13 @@ package lms
 import (
 	"context"
 	"fmt"
+	"lms_system/internal/domain/common"
 
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Service) DownloadAttachment(ctx context.Context, attachmentId uint, userId string) (string, error) {
+func (s *Service) DownloadAttachment(ctx context.Context, attachmentId uint, userId string, role common.UserRole) (string, error) {
 
-	// INFO — общее действие
 	s.logger.WithFields(logrus.Fields{
 		"attachment_id": attachmentId,
 		"user_id":       userId,
@@ -25,14 +25,13 @@ func (s *Service) DownloadAttachment(ctx context.Context, attachmentId uint, use
 		return "", fmt.Errorf("attachment not found")
 	}
 
-	// DEBUG — детали вложения
 	s.logger.WithFields(logrus.Fields{
 		"attachment_id": attachmentId,
 		"lesson_id":     attachment.LessonID,
 		"url":           attachment.URL,
 	}).Debug("Attachment details")
 
-	hasAccess, err := s.CheckUserAccessToLesson(ctx, userId, attachment.LessonID)
+	hasAccess, err := s.CheckUserAccessToLesson(ctx, userId, role, attachment.LessonID)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to check user access")
 		return "", fmt.Errorf("failed to check access: %w", err)
@@ -51,7 +50,6 @@ func (s *Service) DownloadAttachment(ctx context.Context, attachmentId uint, use
 		return "", fmt.Errorf("failed to get download URL: %w", err)
 	}
 
-	// INFO — успешный результат
 	s.logger.WithField("attachment_id", attachmentId).Info("Attachment download URL generated successfully")
 
 	return url, nil

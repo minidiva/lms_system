@@ -64,7 +64,7 @@ func (h *Handler) DownloadAttachment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userID := userCtx.UserID
-	downloadURL, err := h.service.DownloadAttachment(r.Context(), uint(attachmentID), userID)
+	downloadURL, err := h.service.DownloadAttachment(r.Context(), uint(attachmentID), userID, userCtx.Role)
 	if err != nil {
 		if err.Error() == "access denied" {
 			http.Error(w, "Access denied", http.StatusForbidden)
@@ -77,7 +77,10 @@ func (h *Handler) DownloadAttachment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to get download URL: %v", err), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, downloadURL, http.StatusTemporaryRedirect)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"download_url": downloadURL,
+	})
 }
 
 func (h *Handler) GetLessonAttachments(w http.ResponseWriter, r *http.Request) {
